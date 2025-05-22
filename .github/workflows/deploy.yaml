@@ -1,0 +1,31 @@
+name: Deploy PostgreSQL to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-postgresql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy PostgreSQL container to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker stop postgresql-dev || true
+            docker rm postgresql-dev || true
+
+            docker volume create postgresql-data || true
+
+            docker run -d \
+              --name postgresql-dev \
+              --restart unless-stopped \
+              -p 5432:5432 \
+              -v postgresql-data:/var/lib/postgresql/data \
+              -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+              -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+              postgres:15
