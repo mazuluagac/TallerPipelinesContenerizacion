@@ -29,10 +29,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Copy SQL files from EC2 host to PostgreSQL container
-            docker cp /tmp/sql-files/. postgresql-dev:/tmp/
+            docker cp /tmp/sql-files/db/. postgresql-dev:/tmp/
 
             # Execute SQL files using psql with explicit credentials
-            for sqlfile in /tmp/sql-files; do
+            for sqlfile in /tmp/sql-files/db/; do
               echo "Executing $sqlfile..."
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
