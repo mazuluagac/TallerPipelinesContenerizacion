@@ -32,7 +32,7 @@ jobs:
             docker cp /tmp/sql-files/db/. postgresql-dev:/tmp/
 
             # Execute SQL files using psql with explicit credentials
-            for sqlfile in /tmp/sql-files/db/; do
+            for sqlfile in /tmp/db/; do
               echo "Executing $sqlfile..."
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
