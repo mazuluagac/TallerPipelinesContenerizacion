@@ -29,11 +29,11 @@ jobs:
             # Copy SQL files from EC2 host to PostgreSQL container
             docker cp /tmp/sql-files/. postgresql-dev:/tmp/
             
-            # Execute SQL files using psql
+            # Execute SQL files using psql with explicit credentials
             for sqlfile in /tmp/sql-files/*.sql; do
               echo "Executing $sqlfile..."
-              docker exec postgresql-dev psql \
-                -U ${{ secrets.POSTGRES_USER }} \
+              docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
+                psql -U ${{ secrets.POSTGRES_USER }} \
                 -d ${{ secrets.POSTGRES_DB }} \
                 -f "/tmp/$(basename $sqlfile)"
             done
