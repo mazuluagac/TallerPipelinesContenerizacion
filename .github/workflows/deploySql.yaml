@@ -1,0 +1,39 @@
+name: Deploy Database to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy SQL files to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "db/*.sql"
+          target: "/tmp/sql-files"
+
+      - name: Execute SQL files in PostgreSQL container
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Copy SQL files from EC2 host to PostgreSQL container
+            docker cp /tmp/sql-files/. postgresql-dev:/tmp/
+            
+            # Execute SQL files using psql
+            for sqlfile in /tmp/sql-files/*.sql; do
+              echo "Executing $sqlfile..."
+              docker exec postgresql-dev psql \
+                -U ${{ secrets.POSTGRES_USER }} \
+                -d ${{ secrets.POSTGRES_DB }} \
+                -f "/tmp/$(basename $sqlfile)"
+            done
