@@ -16,7 +16,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "db/init.sql"
+          source: "db/*.sql"
           target: "/tmp/sql-files"
           port: 22
           debug: true
@@ -28,14 +28,20 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Copy SQL files from EC2 host to PostgreSQL container
-            docker cp /tmp/sql-files/db/. postgresql-dev:/tmp/
+            docker ps | grep postgresql-dev || {
+              echo "Container postgresql-dev not running" >&2
+              exit 1
+            }
 
-            # Execute SQL files using psql with explicit credentials
-            for sqlfile in /tmp/db/*.sql; do
-              echo "Executing $sqlfile..."
+            docker cp /tmp/sql-files/. postgresql-dev:/tmp/
+
+            docker exec postgresql-dev ls -l /tmp
+
+            for sqlfile in /tmp/sql-files/*.sql; do
+              filename=$(basename "$sqlfile")
+              echo "Executing $filename..."
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
                 -d ${{ secrets.POSTGRES_DB }} \
-                -f "/tmp/$(basename $sqlfile)"
+                -f "/tmp/$filename"
             done
