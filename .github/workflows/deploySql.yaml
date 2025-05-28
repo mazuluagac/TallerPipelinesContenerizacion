@@ -43,5 +43,5 @@ jobs:
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
                 -d ${{ secrets.POSTGRES_DB }} \
-                -f "/tmp/db/init.sql"
+                -f "/tmp/db/$filename.sql"
             done
