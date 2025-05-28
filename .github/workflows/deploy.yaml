@@ -30,6 +30,11 @@ jobs:
 
             docker volume create postgresql-data || true
 
+            echo "Starting PostgreSQL container..."
+            echo "POSTGRES_USER: ${{ secrets.POSTGRES_USER }}"
+            echo "POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}"
+            echo "POSTGRES_DB: ${{ secrets.POSTGRES_DB }}"
+
             docker run -d \
               --name postgresql-dev \
               --restart unless-stopped \
