@@ -37,11 +37,11 @@ jobs:
 
             docker exec postgresql-dev ls -l /tmp/db/
 
-            for sqlfile in /tmp/db/*.sql; do
+            for sqlfile in /tmp/db/; do
               filename=$(basename "$sqlfile")
               echo "Executing $filename..."
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
                 -d ${{ secrets.POSTGRES_DB }} \
-                -f "/tmp/db/$filename.sql"
+                -f "/tmp/db/$filename"
             done
