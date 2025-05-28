@@ -35,7 +35,7 @@ jobs:
 
             docker cp /tmp/sql-files/. postgresql-dev:/tmp/
 
-            docker exec postgresql-dev ls -l /tmp
+            docker exec postgresql-dev ls -l /tmp/db/
 
             for sqlfile in /tmp/db/*.sql; do
               filename=$(basename "$sqlfile")
@@ -43,5 +43,5 @@ jobs:
               docker exec -e PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} postgresql-dev \
                 psql -U ${{ secrets.POSTGRES_USER }} \
                 -d ${{ secrets.POSTGRES_DB }} \
-                -f "/tmp/db/$filename"
+                -f "/tmp/db/init.sql"
             done
